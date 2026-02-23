@@ -15,15 +15,20 @@ export default function Dashboard() {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [dark, setDark] = useState(false)
+  const [dark, setDark] = useState(true)
   const [search, setSearch] = useState('')
   const [showNote, setShowNote] = useState<Note | null>(null)
 
-  // Load theme
+  // Default DARK mode
   useEffect(() => {
     const saved = localStorage.getItem('theme')
-    if (saved === 'dark') {
+
+    if (saved === 'light') {
+      document.documentElement.classList.remove('dark')
+      setDark(false)
+    } else {
       document.documentElement.classList.add('dark')
+      localStorage.setItem('theme', 'dark')
       setDark(true)
     }
   }, [])
@@ -163,7 +168,8 @@ export default function Dashboard() {
           {filteredNotes.map((note) => (
             <div
               key={note.id}
-              className="theme-card p-4 rounded-xl shadow-sm animate-fade"
+              onClick={() => setShowNote(note)}
+              className="theme-card p-4 rounded-xl shadow-sm animate-fade cursor-pointer"
             >
               <div className="flex justify-between items-start mb-2">
                 <h2 className="font-semibold text-gray-900 dark:text-white">
@@ -172,21 +178,20 @@ export default function Dashboard() {
 
                 <div className="space-x-3 text-sm">
                   <button
-                    onClick={() => setShowNote(note)}
-                    className="hover:opacity-70"
-                  >
-                    Show
-                  </button>
-
-                  <button
-                    onClick={() => editNote(note)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      editNote(note)
+                    }}
                     className="hover:opacity-70"
                   >
                     Edit
                   </button>
 
                   <button
-                    onClick={() => deleteNote(note.id)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      deleteNote(note.id)
+                    }}
                     className="text-red-500 hover:opacity-70"
                   >
                     Delete
@@ -208,9 +213,14 @@ export default function Dashboard() {
 
       {/* MODAL */}
       {showNote && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="theme-card max-w-lg w-full p-6 rounded-xl shadow-lg relative">
-
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+          onClick={() => setShowNote(null)}
+        >
+          <div
+            className="theme-card max-w-lg w-full p-6 rounded-xl shadow-lg relative"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={() => setShowNote(null)}
               className="absolute top-3 right-3 text-sm text-gray-500 hover:opacity-70"
